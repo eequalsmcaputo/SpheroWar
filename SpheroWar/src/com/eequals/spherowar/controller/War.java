@@ -17,6 +17,7 @@ import com.eequals.spherowar.model.Impact.ImpactResult;
 import com.eequals.spherowar.model.SpheroTank;
 import com.eequals.spherowar.model.Impact;
 import com.eequals.spherowar.Util;
+import com.eequals.spherowar.WarActivity;
 
 public class War {
 
@@ -25,13 +26,15 @@ public class War {
 	private LocalMultiplayerClient _mp;
 	private SpheroTank _st;
 	private ArrayList<ImpactResult> results = new ArrayList<ImpactResult>();
+	public String currentMode = "";
 	
 	public static final double FRONT_LEFT = 45.0d;
 	public static final double FRONT_RIGHT = 45.0d;
 	public static final int IMPACT_THRESHOLD = 100;
 	
-	public War(Context context, Robot robot, String player_name) {
+	public War(Context context, Robot robot, String player_name, String mode) {
 		_context = context;
+		currentMode = mode;
 		_mp = new LocalMultiplayerClient(_context);
 		_mp.open();
 		_mp.setOnGameDataReceivedListener(_GameDataListener);
@@ -69,23 +72,30 @@ public class War {
 
 	public void registerImpact(SpheroTank st)
 	{
-		boolean isImpact = false;
 		
-		if (_lastimpact == null)
+		if (this.currentMode.equals(WarActivity.MODE_SINGLE))
 		{
-			isImpact = true;
+			
+			_st.hit(-1);
+			
 		} else {
-			if (War.isOldImpact(_lastimpact)) {
+			boolean isImpact = false;
+		
+			if (_lastimpact == null)
+			{
 				isImpact = true;
+			} else {
+				if (War.isOldImpact(_lastimpact)) {
+					isImpact = true;
+				}
+			}
+			
+			if (isImpact)
+			{
+				_lastimpact = new Impact(st);
+				sendImpact();
 			}
 		}
-		
-		if (isImpact)
-		{
-			_lastimpact = new Impact(st);
-			sendImpact();
-		}
-
 	}
 	
 	private void sendImpact()

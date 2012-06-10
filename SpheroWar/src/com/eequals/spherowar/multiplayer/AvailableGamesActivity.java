@@ -1,4 +1,4 @@
-package com.eequals.spherowar;
+package com.eequals.spherowar.multiplayer;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -14,6 +14,9 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.eequals.spherowar.R;
+import com.eequals.spherowar.R.id;
+import com.eequals.spherowar.R.layout;
 import com.eequals.spherowar.view.GameListItemView;
 import orbotix.multiplayer.LocalMultiplayerClient;
 import orbotix.multiplayer.MultiplayerGame;

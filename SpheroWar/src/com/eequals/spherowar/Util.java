@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.eequals.spherowar.model.Impact.ImpactResult;
 
@@ -99,7 +100,7 @@ public class Util {
 		return Math.toDegrees(Math.atan2(y, x));
 	}
 	
-	private static class ColorFlasher extends AsyncTask {
+	private static class ColorFlasher extends AsyncTask<Object, Object, Object> {
 		
 		private Robot _robot;
 		private int _red;
@@ -127,6 +128,7 @@ public class Util {
 			do
 			{
 				try {
+					Log.w("SW_FLASHER", "Flash " + i);
 					RGBLEDOutputCommand.sendCommand(_robot, _red, _green, _blue);
 					Thread.sleep(_durationMillis);
 					RGBLEDOutputCommand.sendCommand(_robot, 0, 0, 0);
@@ -137,7 +139,7 @@ public class Util {
 				}				
 				i++;
 			} while(i <= _count);
-			
+
 			return null;
 		}
 		

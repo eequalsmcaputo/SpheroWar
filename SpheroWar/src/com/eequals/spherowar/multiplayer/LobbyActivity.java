@@ -1,4 +1,4 @@
-package com.eequals.spherowar;
+package com.eequals.spherowar.multiplayer;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,6 +14,10 @@ import orbotix.multiplayer.MultiplayerGame;
 import orbotix.multiplayer.RemotePlayer;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.eequals.spherowar.R;
+import com.eequals.spherowar.R.id;
+import com.eequals.spherowar.R.layout;
 
 import java.util.List;
 

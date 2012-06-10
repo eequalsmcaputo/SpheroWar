@@ -31,6 +31,7 @@ public class SpheroTank {
 		_war = war;
 		_id = robot.getUniqueId();
 		_name = player_name;
+		_Robot = robot;
 		initSphero();
 		initTank();
 	}
@@ -45,7 +46,9 @@ public class SpheroTank {
 		//// Now send a command to enable streaming collisions
 		ConfigureCollisionDetectionCommand.sendCommand(_Robot,
 				ConfigureCollisionDetectionCommand.DEFAULT_DETECTION_METHOD,
-				45, 45, 100, 100, 100);
+				30, 30, 95, 95, 100);
+		
+		//Util.flashColor(_Robot, 254, 0, 0, 300, 5);
 	}
 	
 	private void initTank()
@@ -112,7 +115,20 @@ public class SpheroTank {
 	private final AsyncDataListener mCollisionListener = new AsyncDataListener() {
 
 		public void onDataReceived(DeviceAsyncData asyncData) {
-			if (asyncData instanceof CollisionDetectedAsyncData) {
+			if (asyncData instanceof CollisionDetectedAsyncData)
+			{
+				
+				/*
+				try {
+					RGBLEDOutputCommand.sendCommand(_Robot, 254, 0, 0);
+					Thread.sleep(300);
+					RGBLEDOutputCommand.sendCommand(_Robot, 0, 0, 0);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				*/
+				
 				_lastimp =	(CollisionDetectedAsyncData) asyncData;
 				_war.registerImpact(SpheroTank.this);
 			}
