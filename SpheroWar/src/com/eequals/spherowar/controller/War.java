@@ -1,7 +1,7 @@
 package com.eequals.spherowar.controller;
 
 
-import java.util.Calendar;
+import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import orbotix.multiplayer.LocalMultiplayerClient;
 import orbotix.multiplayer.LocalMultiplayerClient.OnGameDataReceivedListener;
 import orbotix.multiplayer.RemotePlayer;
-import orbotix.robot.base.CollisionDetectedAsyncData;
+import orbotix.robot.base.Robot;
 
 import android.content.Context;
 
@@ -24,18 +24,19 @@ public class War {
 	private Context _context;
 	private LocalMultiplayerClient _mp;
 	private SpheroTank _st;
+	private ArrayList<ImpactResult> results = new ArrayList<ImpactResult>();
 	
 	public static final double FRONT_LEFT = 45.0d;
 	public static final double FRONT_RIGHT = 45.0d;
 	public static final int IMPACT_THRESHOLD = 100;
 	
-	public War(Context context, String robot_id, String player_name) {
+	public War(Context context, Robot robot, String player_name) {
 		_context = context;
 		_mp = new LocalMultiplayerClient(_context);
 		_mp.open();
 		_mp.setOnGameDataReceivedListener(_GameDataListener);
 		
-		_st = new SpheroTank(this, robot_id, player_name);
+		_st = new SpheroTank(this, robot, player_name);
 		
 	}
 	
@@ -55,7 +56,7 @@ public class War {
 					registerOtherImpact(data);
 				} else if (imptype == Util.IMPTYPE_RESULT)
 				{
-					
+					resolveImpactResult(data);
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -103,9 +104,9 @@ public class War {
 			{
 				if (_lastimpact.isImpact(other))
 				{
-					
-										
-					resetImpact();
+					ImpactResult result = _lastimpact.getImpactResult(other);
+					sendResult(Util.getImpactResultJSON(result));
+					resolveImpactResult(result);
 				}
 			}
 		} catch (JSONException e) {
@@ -116,13 +117,18 @@ public class War {
 	
 	private void sendResult(JSONObject result)
 	{
-		
+		_mp.sendGameDataToAll(result);
 	}
 	
 	private void resolveImpactResult(JSONObject result)
 	{
-		
-		
+		resolveImpactResult(new ImpactResult(result));
+	}
+	
+	private void resolveImpactResult(ImpactResult result)
+	{
+		_lastimpact.hitST(result);
+		trackImpactResult(result);
 		resetImpact();
 	}
 	
@@ -131,9 +137,9 @@ public class War {
 		_lastimpact = null;
 	}
 	
-	private void recordImpactResult(ImpactResult result)
+	private void trackImpactResult(ImpactResult result)
 	{
-		
+		results.add(result);
 	}
 	
 	public static boolean isInFront(double loc)
@@ -150,5 +156,10 @@ public class War {
 	{
 		return (Math.abs(System.currentTimeMillis() - impact.getImpactTimestamp()) > 
 			IMPACT_THRESHOLD);
+	}
+	
+	public void cleanup()
+	{
+		_st.cleanupRobot();
 	}
 }

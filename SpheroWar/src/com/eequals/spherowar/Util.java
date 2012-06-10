@@ -4,9 +4,13 @@ import java.util.Calendar;
 import java.util.Date;
 
 import orbotix.robot.base.CollisionDetectedAsyncData;
+import orbotix.robot.base.RGBLEDOutputCommand;
+import orbotix.robot.base.Robot;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.os.AsyncTask;
 
 import com.eequals.spherowar.model.Impact.ImpactResult;
 
@@ -48,12 +52,13 @@ public class Util {
 			impact.put(IMP_PWR_X, data.getImpactPower().x);
 			impact.put(IMP_PWR_Y, data.getImpactPower().y);
 			
+			return impact;
+			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
-		
-		return impact;
 	}
 	
 	public static JSONObject getImpactResultJSON(ImpactResult result)
@@ -66,15 +71,21 @@ public class Util {
 			resultj.put(IMPRES_TIMESTAMP, result.getTimestamp());
 			resultj.put(IMPRES_HIT1, result.getHit(result.getID1()));
 			resultj.put(IMPRES_HIT2, result.getHit(result.getID2()));
-			
+			return resultj;
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
-		
-		
-		return resultj;
 	}
+	
+	public static void flashColor(Robot robot, int red, int green, int blue, 
+			long durationMillis, int count)
+	{
+		ColorFlasher flasher = new ColorFlasher(robot, red, green, blue, durationMillis, count);
+		flasher.execute();
+	}
+	
 	
 	public static long dateToLong(Date date)
 	{
@@ -86,6 +97,50 @@ public class Util {
 	public static double getImpactLocation(double x, double y)
 	{
 		return Math.toDegrees(Math.atan2(y, x));
+	}
+	
+	private static class ColorFlasher extends AsyncTask {
+		
+		private Robot _robot;
+		private int _red;
+		private int _green;
+		private int _blue;
+		private long _durationMillis;
+		private int _count;
+		
+		public ColorFlasher(Robot robot, int red, int green, int blue, 
+				long durationMillis, int count)
+		{
+			_robot = robot;
+			_red = red;
+			_green = green;
+			_blue = blue;
+			_durationMillis = durationMillis;
+			_count = count;
+		}
+		
+		@Override
+		protected Object doInBackground(Object... params) {
+
+			int i = 1;
+			
+			do
+			{
+				try {
+					RGBLEDOutputCommand.sendCommand(_robot, _red, _green, _blue);
+					Thread.sleep(_durationMillis);
+					RGBLEDOutputCommand.sendCommand(_robot, 0, 0, 0);
+					Thread.sleep(_durationMillis);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}				
+				i++;
+			} while(i <= _count);
+			
+			return null;
+		}
+		
 	}
 	
 }

@@ -28,6 +28,11 @@ public class Impact {
 		return _st;
 	}
 	
+	public void hitST(ImpactResult result)
+	{
+		_st.hit(result.getHit(_st.getId()));
+	}
+	
 	public long getImpactTimestamp()
 	{
 		return _impacttime;
@@ -79,7 +84,7 @@ public class Impact {
 		
 	}
 	
-	public class ImpactResult {
+	public static class ImpactResult {
 		
 		private HashMap<String, Integer> res = new HashMap<String, Integer>();
 		private long _timestamp;
@@ -95,7 +100,14 @@ public class Impact {
 		
 		public ImpactResult(JSONObject result)
 		{
-			
+			try {
+				res.put(result.getString(Util.IMPRES_ID1), result.getInt(Util.IMPRES_HIT1));
+				res.put(result.getString(Util.IMPRES_ID2), result.getInt(Util.IMPRES_HIT2));
+				_timestamp = result.getLong(Util.IMPRES_TIMESTAMP);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		public String getID1()

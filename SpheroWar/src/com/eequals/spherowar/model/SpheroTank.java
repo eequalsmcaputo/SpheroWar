@@ -1,5 +1,6 @@
 package com.eequals.spherowar.model;
 
+import com.eequals.spherowar.Util;
 import com.eequals.spherowar.controller.War;
 
 import orbotix.robot.base.CollisionDetectedAsyncData;
@@ -8,6 +9,7 @@ import orbotix.robot.base.DeviceAsyncData;
 import orbotix.robot.base.DeviceMessenger;
 import orbotix.robot.base.Robot;
 import orbotix.robot.base.RobotProvider;
+import orbotix.robot.base.RGBLEDOutputCommand;
 import orbotix.robot.base.DeviceMessenger.AsyncDataListener;
 
 public class SpheroTank {
@@ -25,9 +27,9 @@ public class SpheroTank {
 	
 	CollisionDetectedAsyncData _lastimp;
 	
-	public SpheroTank (War war, String robot_id, String player_name) {
+	public SpheroTank (War war, Robot robot, String player_name) {
 		_war = war;
-		_id = robot_id;
+		_id = robot.getUniqueId();
 		_name = player_name;
 		initSphero();
 		initTank();
@@ -35,10 +37,6 @@ public class SpheroTank {
 	
 	private void initSphero()
 	{
-	
-		if (_id != null && !_id.equals("")) {
-			_Robot = RobotProvider.getDefaultProvider().findRobot(_id);
-		}
 
 		// Start streaming collision detection data
 		//// First register a listener to process the data
@@ -85,16 +83,18 @@ public class SpheroTank {
 		return _name;
 	}
 	
-	public void Hit(int hp)
+	public void hit(int hp)
 	{
 		_lasthit = hp;
 		if (hp < 0)
 		{
 			_hp_current += hp;
 			_losses += 1;
+			Util.flashColor(_Robot, 254, 0, 0, 300, 5);
 		} else {
 			if (hp > 0) {
 				_wins += 1;
+				Util.flashColor(_Robot, 0, 254, 0, 300, 5);
 			}
 		}
 	}
@@ -103,7 +103,6 @@ public class SpheroTank {
 	{
 		return _lasthit;
 	}
-
 	
 	public CollisionDetectedAsyncData getLastImpactData()
 	{
@@ -121,5 +120,17 @@ public class SpheroTank {
 		
 	};
 
+	public void cleanupRobot()
+	{
+		// Assume that collision detection is configured and disable it.
+		ConfigureCollisionDetectionCommand.sendCommand(_Robot, 
+				ConfigureCollisionDetectionCommand.DISABLE_DETECTION_METHOD, 0, 0, 0, 0, 0);
+		
+		// Remove async data listener
+		DeviceMessenger.getInstance().removeAsyncDataListener(_Robot, mCollisionListener);
+		
+		// Disconnect from the robot.
+		RobotProvider.getDefaultProvider().removeAllControls();
+	}
 
 }
